@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SoloLevelin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        html,
+        body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow: auto;
+            background-color: #1C1C1E;
+            position: static !important;
+            inset: auto !important;
+            display: block !important;
+            place-content: normal !important;
+            align-items: normal !important;
+            /* Hide scrollbar for Firefox */
+            scrollbar-width: none;
+        }
+
+        /* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        .dashboard-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* Header */
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 100;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-icon-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 9999px;
+            background: #b8e84c;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #1C1C1E;
+            transition: all 150ms ease-out;
+            font-weight: 500;
+        }
+
+        .user-icon-button:hover {
+            transform: scale(1.05);
+            background: #98d82a;
+            box-shadow: 0 4px 12px rgba(184, 232, 76, 0.4);
+        }
+
+        .user-icon-button:active {
+            transform: scale(0.97);
+        }
+
+        .user-icon-button.active {
+            background: #98d82a;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 0;
+            min-width: 250px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(209, 209, 214, 0.2);
+            display: none;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(209, 209, 214, 0.2);
+        }
+
+        .user-dropdown-header .user-name {
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-dropdown-header .user-email {
+            color: #8E8E93;
+            font-size: 12px;
+        }
+
+        .user-dropdown-item {
+            padding: 12px 24px;
+            color: #AEAEB2;
+            cursor: pointer;
+            transition: all 150ms ease-out;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+        }
+
+        .user-dropdown-item.logout {
+            color: #FF3B30;
+            border-top: 1px solid rgba(209, 209, 214, 0.2);
+            margin-top: 4px;
+        }
+
+        .user-dropdown-item.logout:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 20%;
+            min-width: 280px;
+            height: calc(100vh - 64px);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .sidebar-top {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: #1C1C1E;
+            border-radius: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-top.expanded {
+            aspect-ratio: unset;
+            height: auto;
+        }
+
+        .sidebar-bottom {
+            flex: 0 0 auto;
+            width: 100%;
+            height: calc(100vh - 64px - 20vw - 48px);
+            background-color: #1C1C1E;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+            justify-content: flex-start;
+            align-items: stretch;
+            flex-shrink: 0;
+        }
+
+        /* Calendar Styles */
+        .calendar {
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            margin-bottom: 12px;
+        }
+
+        .calendar-content {
+            position: relative;
+            flex: 1;
+            min-height: 200px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .calendar-nav-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease-out;
+            font-size: 16px;
+        }
+
+        .calendar-nav-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-nav-button:active {
+            transform: scale(0.97);
+        }
+
+        .calendar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FFFFFF;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 150ms ease-out;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-title:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-view-toggle {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 2px;
+            flex-shrink: 0;
+        }
+
+        .calendar-toggle-button {
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #8E8E93;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease-out;
+            white-space: nowrap;
+        }
+
+        .calendar-toggle-button.active {
+            background: #b8e84c;
+            color: #1C1C1E;
+        }
+
+        .calendar-month-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-width: 0;
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .calendar-month-view.hide {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            width: 100%;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: #8E8E93;
+            padding: 8px 0;
+            min-width: 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 150ms ease-out;
+            background: transparent;
+            min-width: 0;
+            padding: 2px;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-day.today {
+            background: rgba(184, 232, 76, 0.2);
+            color: #b8e84c;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background: #b8e84c;
+            color: #1C1C1E;
+            font-weight: 600;
+        }
+
+        .calendar-day.other-month {
+            color: #636366;
+        }
+
+        .calendar-year-view {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+            min-width: 0;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1C1C1E;
+            z-index: 5;
+            align-content: center;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .calendar-year-view.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .calendar-year-item {
+            padding: 8px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 150ms ease-out;
+            background: transparent;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1.5;
+        }
+
+        .calendar-year-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-year-item.current {
+            background: rgba(184, 232, 76, 0.2);
+            color: #b8e84c;
+        }
+
+        .calendar-year-item.selected {
+            background: #b8e84c;
+            color: #1C1C1E;
+            font-weight: 600;
+        }
+
+        .calendar-month-selector {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            padding: 8px;
+            background: #1C1C1E;
+            border-radius: 12px;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            align-content: center;
+            box-sizing: border-box;
+        }
+
+        .calendar-month-selector.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .calendar-month-option {
+            padding: 8px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 150ms ease-out;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1.5;
+        }
+
+        .calendar-month-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-month-option.current {
+            background: rgba(184, 232, 76, 0.2);
+            color: #b8e84c;
+        }
+
+        .calendar-month-option.selected {
+            background: #b8e84c;
+            color: #1C1C1E;
+            font-weight: 600;
+        }
+
+        .calendar-nav {
+            position: relative;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #8E8E93;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #b8e84c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-container {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #FF3B30;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 48px;
+        }
+
+        /* Close dropdown when clicking outside */
+        .dropdown-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99;
+            display: none;
+        }
+
+        .dropdown-overlay.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 16px 24px;
+            }
+        }
+
+        /* Floating Action Button */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .fab-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #b8e84c 0%, #98d82a 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(184, 232, 76, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fab-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(184, 232, 76, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .fab-button:active {
+            transform: scale(0.95);
+        }
+
+        .fab-button i {
+            font-size: 24px;
+            color: #1C1C1E;
+            transition: transform 200ms ease;
+        }
+
+        .fab-button.active i {
+            transform: rotate(45deg);
+        }
+
+        /* FAB Sub Buttons */
+        .fab-sub-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: center;
+        }
+
+        .fab-sub-buttons.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .fab-sub-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .fab-sub-button-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(184, 232, 76, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fab-sub-button:hover .fab-sub-button-icon {
+            background: rgba(184, 232, 76, 0.15);
+            border-color: #b8e84c;
+            transform: scale(1.1);
+        }
+
+        .fab-sub-button-icon i {
+            font-size: 20px;
+            color: #b8e84c;
+        }
+
+        .fab-sub-button-label {
+            position: absolute;
+            right: calc(100% + 12px);
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fab-sub-button:hover .fab-sub-button-label {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* FAB Overlay */
+        .fab-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fab-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Header Calendar Button (Mobile Only) */
+        .header-calendar-button {
+            display: none;
+            /* Hidden on desktop */
+        }
+
+        /* Timeline Toggle Button (Mobile) */
+        .timeline-toggle-button {
+            display: none;
+            /* Hidden on desktop */
+        }
+
+        /* Desktop styles for weekly calendar wrapper */
+        .weekly-calendar-mobile-wrapper {
+            /* On desktop, show calendar normally */
+            position: relative;
+            transform: none;
+            width: auto;
+            height: auto;
+            background: transparent;
+        }
+
+        .weekly-calendar-back-button {
+            display: none;
+            /* Hidden on desktop */
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 640px) {
+
+            /* Keep sidebar visible but hide only the mini calendar */
+            .sidebar {
+                display: flex !important;
+                flex-direction: column;
+                width: 100% !important;
+                position: relative !important;
+            }
+
+            /* Hide mini calendar on mobile */
+            .sidebar-bottom {
+                display: none !important;
+            }
+
+            /* DaySummaryBoard full width */
+            .sidebar-top {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 20px !important;
+                padding-top: 0 !important;
+                border-radius: 0 !important;
+                background-color: transparent !important;
+                box-shadow: none !important;
+            }
+
+            /* Mobile header adjustments - embed in layout */
+            .dashboard-header {
+                position: relative !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                justify-content: space-between !important;
+                padding: 20px !important;
+                width: 100%;
+                margin-bottom: 0;
+                z-index: 100;
+                order: -1;
+                background-color: #1C1C1E;
+            }
+
+            /* Dashboard container as flex to support ordering */
+            .dashboard-container {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Keep sidebar at top but below header */
+            .sidebar {
+                padding-top: 0 !important;
+                order: 0;
+            }
+
+            /* User avatar - move to left edge */
+            .user-menu-container {
+                margin-left: 0;
+            }
+
+            /* User dropdown - align to left on mobile */
+            .user-dropdown {
+                left: 0 !important;
+                right: auto !important;
+            }
+
+            /* Header calendar button - styled like back button */
+            .header-calendar-button {
+                display: flex;
+                background: transparent;
+                border: none;
+                color: #b8e84c;
+                padding: 10px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                align-items: center;
+                gap: 8px;
+                transition: opacity 0.2s;
+            }
+
+            .header-calendar-button:active {
+                opacity: 0.7;
+            }
+
+            /* Hide floating timeline toggle button on mobile */
+            .timeline-toggle-button {
+                display: none !important;
+            }
+
+            /* Weekly calendar wrapper for mobile slide-in */
+            .weekly-calendar-mobile-wrapper {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 100%;
+                height: 100vh;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-out;
+                z-index: 1000;
+                background: #1C1C1E;
+                overflow: auto;
+            }
+
+            .weekly-calendar-mobile-wrapper.show {
+                transform: translateX(0);
+            }
+
+            /* Back button in weekly calendar */
+            .weekly-calendar-back-button {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: transparent;
+                border: none;
+                color: #b8e84c;
+                padding: 10px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 1001;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: opacity 0.2s;
+            }
+
+            .weekly-calendar-back-button:active {
+                opacity: 0.7;
+            }
+
+            /* Horizontal snap scroll for mobile calendar - swipe between days */
+            .weekly-calendar-scroll-wrapper {
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scroll-padding-left: 60px;
+            }
+
+            .weekly-calendar-scroll {
+                overflow-x: auto !important;
+                scroll-padding-left: 60px;
+            }
+
+            /* Make grid scrollable horizontally */
+            .weekly-calendar-grid {
+                grid-template-columns: 60px repeat(7, 100vw) !important;
+                width: max-content;
+            }
+
+            /* Snap to each day column at start (after time labels) */
+            .time-slot-cell {
+                scroll-snap-align: start;
+            }
+
+            /* Keep time labels fixed on left */
+            .weekly-calendar-time-label {
+                position: sticky;
+                left: 0;
+                z-index: 10;
+                background-color: #1C1C1E;
+            }
+
+            /* Adjust dashboard container for mobile */
+            .dashboard-container {
+                padding-bottom: 80px;
+            }
+
+            /* Hide FAB when weekly calendar is open */
+            .weekly-calendar-mobile-wrapper.show~.fab-button,
+            .weekly-calendar-mobile-wrapper.show~.timeline-toggle-button {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            /* Remove border-radius and shadows for mobile edge-to-edge design */
+            /* Only target main containers, keep inner elements rounded */
+            .weekly-calendar-mobile-wrapper {
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .sidebar {
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .weekly-calendar-back-button {
+                border-radius: 4px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loadingContainer" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Checking authentication status...</p>
+    </div>
+
+    <div id="dashboardContainer" class="dashboard-container" style="display: none;">
+        <div class="dropdown-overlay" id="dropdownOverlay"></div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-top"></div>
+            <div class="sidebar-bottom">
+                <div class="calendar" id="calendar">
+                    <div class="calendar-header">
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-button" id="prevButton">‹</button>
+                            <div class="calendar-title" id="calendarTitle">Jan 2024</div>
+                            <button class="calendar-nav-button" id="nextButton">›</button>
+                        </div>
+                        <div class="calendar-view-toggle">
+                            <button class="calendar-toggle-button active" id="monthViewBtn">Month</button>
+                            <button class="calendar-toggle-button" id="yearViewBtn">Year</button>
+                        </div>
+                    </div>
+                    <div class="calendar-content">
+                        <div class="calendar-month-view" id="monthView">
+                            <div class="calendar-days-grid" id="daysGrid">
+                                <div class="calendar-weekday">Sun</div>
+                                <div class="calendar-weekday">Mon</div>
+                                <div class="calendar-weekday">Tue</div>
+                                <div class="calendar-weekday">Wed</div>
+                                <div class="calendar-weekday">Thu</div>
+                                <div class="calendar-weekday">Fri</div>
+                                <div class="calendar-weekday">Sat</div>
+                            </div>
+                        </div>
+                        <div class="calendar-month-selector" id="monthSelector">
+                            <div class="calendar-month-option" data-month="0">Jan</div>
+                            <div class="calendar-month-option" data-month="1">Feb</div>
+                            <div class="calendar-month-option" data-month="2">Mar</div>
+                            <div class="calendar-month-option" data-month="3">Apr</div>
+                            <div class="calendar-month-option" data-month="4">May</div>
+                            <div class="calendar-month-option" data-month="5">Jun</div>
+                            <div class="calendar-month-option" data-month="6">Jul</div>
+                            <div class="calendar-month-option" data-month="7">Aug</div>
+                            <div class="calendar-month-option" data-month="8">Sep</div>
+                            <div class="calendar-month-option" data-month="9">Oct</div>
+                            <div class="calendar-month-option" data-month="10">Nov</div>
+                            <div class="calendar-month-option" data-month="11">Dec</div>
+                        </div>
+                        <div class="calendar-year-view" id="yearView"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header with User Icon -->
+        <header class="dashboard-header">
+            <div class="user-menu-container">
+                <button class="user-icon-button" id="userIconButton" title="User Menu">
+                    <span id="userIconText">👤</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <div class="user-name" id="dropdownUserName">User</div>
+                        <div class="user-email" id="dropdownUserEmail">user@example.com</div>
+                    </div>
+                    <div class="user-dropdown-item" id="profileMenuItem">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </div>
+                    <div class="user-dropdown-item" id="settingsMenuItem">
+                        <span>⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                    <div class="user-dropdown-item logout" id="logoutMenuItem">
+                        <span>🚪</span>
+                        <span>Sign Out</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Calendar toggle button (Mobile only) -->
+            <button class="header-calendar-button" id="headerCalendarButton" title="View Calendar">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>Calendar</span>
+            </button>
+        </header>
+
+        <!-- Floating Action Button -->
+        <div class="fab-overlay" id="fabOverlay"></div>
+        <div class="fab-container">
+            <div class="fab-sub-buttons" id="fabSubButtons">
+                <div class="fab-sub-button" id="fabCreateCategory" title="Create Category">
+                    <div class="fab-sub-button-label">Create Category</div>
+                    <div class="fab-sub-button-icon">
+                        <i class="fa-solid fa-folder-plus"></i>
+                    </div>
+                </div>
+                <div class="fab-sub-button" id="fabCreateProject" title="Create Project">
+                    <div class="fab-sub-button-label">Create Project</div>
+                    <div class="fab-sub-button-icon">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+                </div>
+                <div class="fab-sub-button" id="fabCreateEvent" title="Create Event">
+                    <div class="fab-sub-button-label">Create Event</div>
+                    <div class="fab-sub-button-icon">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+                </div>
+            </div>
+            <button class="fab-button" id="fabMainButton" title="Create New">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- Timeline Toggle Button (Mobile Only) -->
+        <button class="timeline-toggle-button" id="timelineToggleButton" title="View Timeline">
+            <i class="fa-solid fa-calendar-days"></i>
+        </button>
+    </div>
+
+    <div id="errorContainer" class="error-container" style="display: none;">
+        <p id="errorMessage"></p>
+    </div>
+
+    <script src="Module/MyModule/firebaseAuth.js"></script>
+    <script src="Module/MyModule/createCategory.js"></script>
+    <script src="Module/MyModule/createProject.js"></script>
+    <script src="Module/MyModule/eventCard.js"></script>
+    <script src="Module/MyModule/eventCardDetailView.js"></script>
+    <script src="Module/MyModule/eventCardCreatePanel.js"></script>
+    <script src="Module/MyModule/weeklyCalendar.js"></script>
+    <script src="Module/MyModule/daySummaryBoard.js"></script>
+    <script>
+        // Firebase configuration (same as index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqSrAV_1VH85bbeG0kmfoEI4m5a6J8Fqo",
+            authDomain: "sololevelin-58fd1.firebaseapp.com",
+            projectId: "sololevelin-58fd1",
+            storageBucket: "sololevelin-58fd1.firebasestorage.app",
+            messagingSenderId: "953399153542",
+            appId: "1:953399153542:web:cfb56c1fbf2ee392835207",
+            measurementId: "G-52YYPCNE75"
+        };
+
+        // Initialize Firebase Auth
+        const firebaseAuth = new FirebaseAuth(firebaseConfig);
+
+        // Make firebaseAuth and firebaseConfig available globally for category saving
+        window.firebaseAuth = firebaseAuth;
+        window.firebaseConfig = firebaseConfig;
+
+        // UI elements
+        const loadingContainer = document.getElementById('loadingContainer');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const userIconButton = document.getElementById('userIconButton');
+        const userDropdown = document.getElementById('userDropdown');
+        const dropdownOverlay = document.getElementById('dropdownOverlay');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+        const logoutMenuItem = document.getElementById('logoutMenuItem');
+        const profileMenuItem = document.getElementById('profileMenuItem');
+        const settingsMenuItem = document.getElementById('settingsMenuItem');
+        const userIconText = document.getElementById('userIconText');
+
+        let currentUser = null;
+
+        // Toggle user dropdown
+        function toggleUserDropdown() {
+            const isOpen = userDropdown.classList.contains('show');
+            if (isOpen) {
+                userDropdown.classList.remove('show');
+                dropdownOverlay.classList.remove('show');
+                userIconButton.classList.remove('active');
+            } else {
+                userDropdown.classList.add('show');
+                dropdownOverlay.classList.add('show');
+                userIconButton.classList.add('active');
+            }
+        }
+
+        // Close dropdown
+        function closeUserDropdown() {
+            userDropdown.classList.remove('show');
+            dropdownOverlay.classList.remove('show');
+            userIconButton.classList.remove('active');
+        }
+
+        // Event listeners for dropdown
+        userIconButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleUserDropdown();
+        });
+
+        dropdownOverlay.addEventListener('click', closeUserDropdown);
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userMenuContainer.contains(e.target)) {
+                closeUserDropdown();
+            }
+        });
+
+        // Update user icon with first letter or emoji
+        function updateUserIcon(user) {
+            if (user.photoURL) {
+                userIconText.textContent = '';
+                userIconButton.style.backgroundImage = `url(${user.photoURL})`;
+                userIconButton.style.backgroundSize = 'cover';
+                userIconButton.style.backgroundPosition = 'center';
+            } else if (user.displayName && user.displayName !== 'N/A') {
+                const firstLetter = user.displayName.charAt(0).toUpperCase();
+                userIconText.textContent = firstLetter;
+            } else if (user.email) {
+                const firstLetter = user.email.charAt(0).toUpperCase();
+                userIconText.textContent = firstLetter;
+            } else {
+                userIconText.textContent = '👤';
+            }
+        }
+
+        // Update user info in dropdown
+        function updateUserDropdown(user) {
+            currentUser = user;
+            const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+            const email = user.email || 'N/A';
+
+            dropdownUserName.textContent = displayName;
+            dropdownUserEmail.textContent = email;
+
+            // Update user icon
+            updateUserIcon(user);
+        }
+
+        // Check authentication status
+        async function checkAuthStatus() {
+            try {
+                // Wait for Firebase to initialize
+                await firebaseAuth.initialize();
+
+                // Set up auth state listener
+                const unsubscribe = await firebaseAuth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        // User is logged in
+                        console.log('User is authenticated:', user);
+                        updateUserDropdown(user);
+                        loadingContainer.style.display = 'none';
+                        dashboardContainer.style.display = 'flex';
+                        errorContainer.style.display = 'none';
+
+                        // Initialize components after authentication
+                        initializeComponents();
+                    } else {
+                        // User is not logged in, redirect to login page
+                        console.log('User is not authenticated, redirecting to login...');
+                        loadingContainer.style.display = 'none';
+                        errorContainer.style.display = 'block';
+                        errorMessage.textContent = 'You are not logged in. Redirecting to login page...';
+
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    }
+                });
+
+                // Also check current user immediately (in case auth state hasn't changed)
+                const currentUserCheck = firebaseAuth.getCurrentUser();
+                if (currentUserCheck) {
+                    updateUserDropdown(currentUserCheck);
+                    loadingContainer.style.display = 'none';
+                    dashboardContainer.style.display = 'flex';
+                    errorContainer.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                loadingContainer.style.display = 'none';
+                errorContainer.style.display = 'block';
+                errorMessage.textContent = 'Error checking authentication. Please try again.';
+            }
+        }
+
+        // Handle logout
+        logoutMenuItem.addEventListener('click', async () => {
+            closeUserDropdown();
+            try {
+                logoutMenuItem.style.opacity = '0.5';
+                logoutMenuItem.innerHTML = '<span>⏳</span><span>Signing out...</span>';
+
+                const result = await firebaseAuth.signOut();
+
+                if (result.success) {
+                    // Redirect to login page
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Error signing out: ' + (result.error || 'Unknown error'));
+                    logoutMenuItem.innerHTML = '<span>🚪</span><span>Sign Out</span>';
+                    logoutMenuItem.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Error signing out:', error);
+                alert('Error signing out. Please try again.');
+                logoutMenuItem.innerHTML = '<span>🚪</span><span>Sign Out</span>';
+                logoutMenuItem.style.opacity = '1';
+            }
+        });
+
+        // Handle profile menu item
+        profileMenuItem.addEventListener('click', () => {
+            closeUserDropdown();
+            alert('Profile feature coming soon!');
+        });
+
+        // Handle settings menu item
+        settingsMenuItem.addEventListener('click', () => {
+            closeUserDropdown();
+            alert('Settings feature coming soon!');
+        });
+
+        // Get user menu container for click outside detection
+        const userMenuContainer = document.querySelector('.user-menu-container');
+
+        // Check auth status on page load
+        checkAuthStatus();
+
+        // Calendar functionality
+        let currentDate = new Date();
+        let currentView = 'month';
+        let selectedDate = new Date();
+
+        const calendarTitle = document.getElementById('calendarTitle');
+        const monthView = document.getElementById('monthView');
+        const yearView = document.getElementById('yearView');
+        const monthViewBtn = document.getElementById('monthViewBtn');
+        const yearViewBtn = document.getElementById('yearViewBtn');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+
+        function updateCalendarTitle() {
+            if (currentView === 'month') {
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                calendarTitle.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            } else {
+                calendarTitle.textContent = currentDate.getFullYear().toString();
+            }
+        }
+
+        function renderMonthView() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+
+            const daysGrid = document.getElementById('daysGrid');
+
+            // Clear existing days (keep weekdays)
+            const existingDays = daysGrid.querySelectorAll('.calendar-day');
+            existingDays.forEach(day => day.remove());
+
+            // Add days from previous month
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = prevMonthLastDay - i;
+
+                const dayDate = new Date(year, month - 1, prevMonthLastDay - i);
+                day.addEventListener('click', () => {
+                    selectedDate = dayDate;
+                    renderMonthView();
+
+                    // Update weekly calendar to show the week containing this date
+                    if (weeklyCalendar) {
+                        weeklyCalendar.setWeekForDate(selectedDate);
+                    }
+
+                    // Update day summary board to show this date's progress
+                    if (daySummaryBoard) {
+                        daySummaryBoard.setDate(selectedDate);
+                    }
+                });
+
+                daysGrid.appendChild(day);
+            }
+
+            // Add days of current month
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+
+                const dayDate = new Date(year, month, i);
+                if (dayDate.toDateString() === today.toDateString()) {
+                    day.classList.add('today');
+                }
+                if (dayDate.toDateString() === selectedDate.toDateString()) {
+                    day.classList.add('selected');
+                }
+
+                day.addEventListener('click', () => {
+                    selectedDate = new Date(year, month, i);
+                    renderMonthView();
+
+                    // Update weekly calendar to show the week containing this date
+                    if (weeklyCalendar) {
+                        weeklyCalendar.setWeekForDate(selectedDate);
+                    }
+
+                    // Update day summary board to show this date's progress
+                    if (daySummaryBoard) {
+                        daySummaryBoard.setDate(selectedDate);
+                    }
+                });
+
+                daysGrid.appendChild(day);
+            }
+
+            // Add days from next month to fill the grid
+            const totalCells = daysGrid.querySelectorAll('.calendar-day').length;
+            const remainingCells = 42 - totalCells; // 6 rows * 7 days
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = i;
+
+                const dayDate = new Date(year, month + 1, i);
+                day.addEventListener('click', () => {
+                    selectedDate = dayDate;
+                    renderMonthView();
+
+                    // Update weekly calendar to show the week containing this date
+                    if (weeklyCalendar) {
+                        weeklyCalendar.setWeekForDate(selectedDate);
+                    }
+
+                    // Update day summary board to show this date's progress
+                    if (daySummaryBoard) {
+                        daySummaryBoard.setDate(selectedDate);
+                    }
+                });
+
+                daysGrid.appendChild(day);
+            }
+        }
+
+        function renderYearView() {
+            const year = currentDate.getFullYear();
+            yearView.innerHTML = '';
+
+            for (let i = year - 6; i <= year + 5; i++) {
+                const yearItem = document.createElement('div');
+                yearItem.className = 'calendar-year-item';
+                yearItem.textContent = i;
+
+                if (i === new Date().getFullYear()) {
+                    yearItem.classList.add('current');
+                }
+                if (i === selectedDate.getFullYear()) {
+                    yearItem.classList.add('selected');
+                }
+
+                yearItem.addEventListener('click', () => {
+                    selectedDate = new Date(i, 0, 1);
+                    currentDate = new Date(i, currentDate.getMonth(), 1);
+                    currentView = 'month';
+                    monthViewBtn.classList.add('active');
+                    yearViewBtn.classList.remove('active');
+
+                    // Hide year view, show month view
+                    yearView.classList.remove('show');
+                    setTimeout(() => {
+                        yearView.style.display = 'none';
+                        monthView.classList.remove('hide');
+                    }, 200);
+
+                    updateCalendarTitle();
+                    renderMonthView();
+                });
+
+                yearView.appendChild(yearItem);
+            }
+        }
+
+        function navigateMonth(direction) {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + direction);
+                renderMonthView();
+            } else {
+                currentDate.setFullYear(currentDate.getFullYear() + direction);
+                renderYearView();
+            }
+            updateCalendarTitle();
+        }
+
+        // Event listeners
+        prevButton.addEventListener('click', () => navigateMonth(-1));
+        nextButton.addEventListener('click', () => navigateMonth(1));
+
+        monthViewBtn.addEventListener('click', () => {
+            if (currentView === 'month') {
+                // Toggle month selector
+                toggleMonthSelector();
+                return;
+            }
+
+            currentView = 'month';
+            monthViewBtn.classList.add('active');
+            yearViewBtn.classList.remove('active');
+
+            // Hide year view, show month view
+            yearView.classList.remove('show');
+            setTimeout(() => {
+                yearView.style.display = 'none';
+                monthView.classList.remove('hide');
+            }, 200);
+
+            updateCalendarTitle();
+            renderMonthView();
+        });
+
+        yearViewBtn.addEventListener('click', () => {
+            currentView = 'year';
+            monthViewBtn.classList.remove('active');
+            yearViewBtn.classList.add('active');
+
+            // Hide month selector if showing
+            monthSelector.classList.remove('show');
+            monthSelector.style.display = 'none';
+
+            // Hide month view, show year view
+            monthView.classList.add('hide');
+            setTimeout(() => {
+                yearView.style.display = 'grid';
+                setTimeout(() => {
+                    yearView.classList.add('show');
+                }, 10);
+            }, 200);
+
+            updateCalendarTitle();
+            renderYearView();
+        });
+
+        const monthSelector = document.getElementById('monthSelector');
+        const monthOptions = monthSelector.querySelectorAll('.calendar-month-option');
+
+        function updateMonthSelector() {
+            const currentMonth = currentDate.getMonth();
+            const today = new Date();
+
+            monthOptions.forEach((option, index) => {
+                option.classList.remove('current', 'selected');
+                if (index === currentMonth) {
+                    option.classList.add('selected');
+                }
+                if (index === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
+                    option.classList.add('current');
+                }
+            });
+        }
+
+        function toggleMonthSelector() {
+            if (currentView === 'month') {
+                const isShowing = monthSelector.classList.contains('show');
+
+                if (isShowing) {
+                    // Hide month selector
+                    monthSelector.classList.remove('show');
+                    setTimeout(() => {
+                        monthSelector.style.display = 'none';
+                    }, 200);
+                } else {
+                    // Show month selector
+                    monthSelector.style.display = 'grid';
+                    setTimeout(() => {
+                        monthSelector.classList.add('show');
+                    }, 10);
+                    updateMonthSelector();
+                }
+            }
+        }
+
+        calendarTitle.addEventListener('click', () => {
+            if (currentView === 'month') {
+                currentView = 'year';
+                monthViewBtn.classList.remove('active');
+                yearViewBtn.classList.add('active');
+
+                // Hide month selector if showing
+                monthSelector.classList.remove('show');
+                monthSelector.style.display = 'none';
+
+                // Hide month view, show year view
+                monthView.classList.add('hide');
+                setTimeout(() => {
+                    yearView.style.display = 'grid';
+                    setTimeout(() => {
+                        yearView.classList.add('show');
+                    }, 10);
+                }, 200);
+
+                updateCalendarTitle();
+                renderYearView();
+            }
+        });
+
+        monthOptions.forEach((option) => {
+            option.addEventListener('click', () => {
+                const month = parseInt(option.dataset.month);
+                currentDate.setMonth(month);
+
+                // Hide month selector
+                monthSelector.classList.remove('show');
+                setTimeout(() => {
+                    monthSelector.style.display = 'none';
+                }, 200);
+
+                updateCalendarTitle();
+                renderMonthView();
+            });
+        });
+
+        // Close month selector when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!monthViewBtn.contains(e.target) && !monthSelector.contains(e.target)) {
+                if (monthSelector.classList.contains('show')) {
+                    monthSelector.classList.remove('show');
+                    setTimeout(() => {
+                        monthSelector.style.display = 'none';
+                    }, 200);
+                }
+            }
+        });
+
+        // Initialize calendar
+        updateCalendarTitle();
+        renderMonthView();
+
+        // Initialize Event Card Create Panel
+        let eventCardCreatePanel = null;
+        let weeklyCalendar = null;
+        let daySummaryBoard = null;
+
+        // Initialize components after authentication
+        function initializeComponents() {
+            // Initialize Event Card Create Panel
+            eventCardCreatePanel = new EventCardCreatePanel({
+                firebaseAuth: firebaseAuth,
+                firebaseConfig: firebaseConfig,
+                onCreate: async (taskData) => {
+                    console.log('New task created:', taskData);
+                    alert(`Task "${taskData.title}" created successfully!`);
+                    // Refresh weekly calendar and day summary to show new event
+                    if (weeklyCalendar) {
+                        await weeklyCalendar.refresh();
+                    }
+                    if (daySummaryBoard) {
+                        await daySummaryBoard.refresh();
+                    }
+                },
+                onCancel: () => {
+                    console.log('Task creation cancelled');
+                },
+                onCategoryCreate: async () => {
+                    // Refresh day summary board when new category is created
+                    if (daySummaryBoard) {
+                        await daySummaryBoard.refresh();
+                    }
+                }
+            });
+
+            // Initialize Weekly Calendar
+            weeklyCalendar = new WeeklyCalendar({
+                firebaseAuth: firebaseAuth,
+                firebaseConfig: firebaseConfig,
+                onEventClick: (event) => {
+                    console.log('Event clicked:', event);
+                },
+                onEventUpdate: async () => {
+                    // Refresh day summary board when events are updated
+                    if (daySummaryBoard) {
+                        await daySummaryBoard.refresh();
+                    }
+                }
+            });
+
+            // Append weekly calendar to dashboard container
+            weeklyCalendar.appendTo(dashboardContainer);
+
+            // Initialize Day Summary Board
+            const sidebarTop = document.querySelector('.sidebar-top');
+            daySummaryBoard = new DaySummaryBoard(firebaseAuth, {
+                onEventUpdate: async () => {
+                    // Refresh weekly calendar when events are updated from day summary board
+                    if (weeklyCalendar) {
+                        await weeklyCalendar.refresh();
+                    }
+                }
+            });
+            daySummaryBoard.appendTo(sidebarTop);
+        }
+
+        // FAB button click handlers
+        const fabMainButton = document.getElementById('fabMainButton');
+        const fabSubButtons = document.getElementById('fabSubButtons');
+        const fabOverlay = document.getElementById('fabOverlay');
+        const fabCreateCategory = document.getElementById('fabCreateCategory');
+        const fabCreateProject = document.getElementById('fabCreateProject');
+        const fabCreateEvent = document.getElementById('fabCreateEvent');
+        let isFabOpen = false;
+
+        // Initialize CreateProjectPanel
+        let createProjectPanel = null;
+        if (typeof CreateProjectPanel !== 'undefined') {
+            createProjectPanel = new CreateProjectPanel({
+                onCreate: async (project) => {
+                    console.log('Creating project:', project);
+                    try {
+                        // Get current user from firebaseAuth class
+                        const user = firebaseAuth.getCurrentUser();
+                        console.log('Current user:', user);
+
+                        if (user && firebaseAuth.db) {
+                            // Import Firestore functions
+                            const { collection, addDoc, Timestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+
+                            // Add project to Firestore
+                            const projectsRef = collection(firebaseAuth.db, "users", user.uid, "projects");
+                            await addDoc(projectsRef, {
+                                name: project.name,
+                                color: project.color,
+                                icon: project.icon,
+                                createdAt: Timestamp.now()
+                            });
+
+                            console.log('✅ Project saved successfully');
+                            alert(`Project "${project.name}" created successfully!`);
+
+                            // Refresh day summary board to show new project
+                            if (daySummaryBoard) {
+                                await daySummaryBoard.refresh();
+                            }
+                        } else {
+                            console.error('❌ No user logged in or db not available');
+                            alert('Please log in to save projects');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error saving project:', error);
+                        alert('Failed to save project. Please try again.');
+                    }
+                }
+            });
+        }
+
+        // Toggle FAB menu
+        function toggleFabMenu() {
+            isFabOpen = !isFabOpen;
+            if (isFabOpen) {
+                fabSubButtons.classList.add('show');
+                fabOverlay.classList.add('show');
+                fabMainButton.classList.add('active');
+            } else {
+                fabSubButtons.classList.remove('show');
+                fabOverlay.classList.remove('show');
+                fabMainButton.classList.remove('active');
+            }
+        }
+
+        // Close FAB menu
+        function closeFabMenu() {
+            if (isFabOpen) {
+                isFabOpen = false;
+                fabSubButtons.classList.remove('show');
+                fabOverlay.classList.remove('show');
+                fabMainButton.classList.remove('active');
+            }
+        }
+
+        // Main FAB button click
+        fabMainButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFabMenu();
+        });
+
+        // Overlay click - close menu
+        fabOverlay.addEventListener('click', () => {
+            closeFabMenu();
+        });
+
+        // Create Category button click
+        fabCreateCategory.addEventListener('click', () => {
+            closeFabMenu();
+            if (eventCardCreatePanel) {
+                // Open category creation mode
+                eventCardCreatePanel.showCategoryCreation();
+            }
+        });
+
+        // Create Project button click
+        fabCreateProject.addEventListener('click', () => {
+            closeFabMenu();
+            if (createProjectPanel) {
+                createProjectPanel.show();
+            }
+        });
+
+        // Create Event button click
+        fabCreateEvent.addEventListener('click', () => {
+            closeFabMenu();
+            if (eventCardCreatePanel) {
+                eventCardCreatePanel.show();
+            }
+        });
+
+        // Header calendar button click handler (Mobile)
+        const headerCalendarButton = document.getElementById('headerCalendarButton');
+        if (headerCalendarButton) {
+            headerCalendarButton.addEventListener('click', () => {
+                if (weeklyCalendar) {
+                    weeklyCalendar.showMobile();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

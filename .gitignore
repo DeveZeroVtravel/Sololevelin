@@ -1,0 +1,44 @@
+# Firebase configuration files (if you have separate config files)
+firebase-config.js
+firebase-config.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Node modules (if you add npm packages later)
+node_modules/
+
+# Build outputs (if you add a build process)
+dist/
+build/
+
+# Optional: Ignore specific files if needed
+# config.js
+# secrets.js
+
+
