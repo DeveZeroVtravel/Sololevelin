@@ -8,7 +8,7 @@ class DaySummaryBoard {
         this.progressText = null;
         this.totalTasksText = null;
         this.completedTasksText = null;
-        this.isExpanded = false;
+        this.isExpanded = window.innerWidth < 640 ? true : false; // Default expanded on mobile
         this.expandButton = null;
         this.expandableSection = null;
         this.categoryBreakdown = null;
@@ -440,7 +440,8 @@ class DaySummaryBoard {
         // Expand button
         this.expandButton = document.createElement('button');
         this.expandButton.className = 'day-summary-expand-btn';
-        this.expandButton.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+        // Set initial icon based on isExpanded state
+        this.expandButton.innerHTML = this.isExpanded ? '<i class="fa-solid fa-chevron-up"></i>' : '<i class="fa-solid fa-chevron-down"></i>';
         this.expandButton.style.cssText = `
             width: 32px;
             height: 32px;
@@ -492,12 +493,15 @@ class DaySummaryBoard {
 
         // Expandable section for category breakdown
         this.expandableSection = document.createElement('div');
+        // Set initial state based on isExpanded (true on mobile, false on desktop)
+        const initialMaxHeight = this.isExpanded ? '600px' : '0';
+        const initialOpacity = this.isExpanded ? '1' : '0';
         this.expandableSection.style.cssText = `
             width: 100%;
-            max-height: 0;
+            max-height: ${initialMaxHeight};
             overflow: hidden;
             transition: max-height 0.3s ease, opacity 0.3s ease;
-            opacity: 0;
+            opacity: ${initialOpacity};
         `;
 
         this.categoryBreakdown = document.createElement('div');
@@ -515,13 +519,30 @@ class DaySummaryBoard {
             width: 100%;
         `;
 
-        // Hide scrollbar for webkit browsers
+        // Hide scrollbar for webkit browsers and add mobile styles
         if (!document.getElementById('day-summary-scrollbar-style')) {
             const style = document.createElement('style');
             style.id = 'day-summary-scrollbar-style';
             style.textContent = `
                 .day-summary-board .category-breakdown::-webkit-scrollbar {
                     display: none;
+                }
+                @media (max-width: 640px) {
+                    .day-summary-board .category-breakdown {
+                        max-height: none !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                    }
+                    .day-summary-board > div:last-of-type {
+                        max-height: none !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                    }
+                    .day-summary-board {
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                    }
                 }
             `;
             document.head.appendChild(style);
